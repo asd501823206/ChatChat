@@ -45,6 +45,11 @@ public class ChatDetailAdapter extends RecyclerView.Adapter<ChatDetailAdapter.De
         notifyDataSetChanged();
     }
 
+    public void addData(ChatDetailBean bean) {
+        data.add(bean);
+        notifyDataSetChanged();
+    }
+
 
     @Override
     public DetailViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

@@ -12,6 +12,8 @@
         android:layout_weight="1"
         android:paddingLeft="10dp"
         android:hint="请输入文字消息"
+        android:textSize="16sp"
+        android:textColorHint="@color/chatbar_bg"
         android:background="@drawable/background_charbar_et"/>
 
     <ImageView
@@ -27,5 +29,17 @@
         android:layout_height="48dp"
         android:padding="8dp"
         android:src="@drawable/chat_add"/>
+
+    <TextView
+        android:id="@+id/tv_chatbar_send"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="发送"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:background="@android:color/holo_green_light"
+        android:padding="8dp"
+        android:gravity="center"
+        android:visibility="gone"/>
 
 </LinearLayout>
