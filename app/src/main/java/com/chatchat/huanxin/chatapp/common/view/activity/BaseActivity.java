@@ -21,16 +21,14 @@ public class BaseActivity extends Activity{
         super.onCreate(savedInstanceState, persistentState);
     }
 
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (null != this.getCurrentFocus()) {
+        if(null != this.getCurrentFocus()){
             //点击空白位置 隐藏软键盘
-            InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            if (manager != null) {
-                return manager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            InputMethodManager mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (mInputMethodManager != null) {
+                return mInputMethodManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
             }
         }
-
         return super.onTouchEvent(event);
     }
 }

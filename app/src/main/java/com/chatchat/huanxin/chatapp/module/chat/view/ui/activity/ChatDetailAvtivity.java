@@ -1,7 +1,9 @@
 package com.chatchat.huanxin.chatapp.module.chat.view.ui.activity;
 
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,12 +12,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chatchat.huanxin.chatapp.R;
+import com.chatchat.huanxin.chatapp.common.database.DBHelper;
 import com.chatchat.huanxin.chatapp.common.view.activity.BaseActivity;
 import com.chatchat.huanxin.chatapp.module.chat.model.ChatDetailBean;
 import com.chatchat.huanxin.chatapp.module.chat.view.adapter.ChatDetailAdapter;
@@ -42,6 +46,9 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
     private TextView mTvSend;
     private int screenHeight;
     private boolean isCreated = false;
+    private float mDown;
+
+    private DBHelper dbHelper;
 
 //    private EMConversation conversation;
 //    private String id;
@@ -70,7 +77,34 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
     }
 
     private void initData() {
+        dbHelper = new DBHelper(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = db.query("message", null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            data = new ArrayList<>();
+            do {
+                ChatDetailBean bean = new ChatDetailBean();
+                bean.setUserNameFrom(cursor.getString(cursor.getColumnIndex("fromName")));
+                bean.setUserNameTo(cursor.getString(cursor.getColumnIndex("toName")));
+                bean.setUserIdFrom(cursor.getString(cursor.getColumnIndex("fromId")));
+                bean.setUserIdTo(cursor.getString(cursor.getColumnIndex("toId")));
+                bean.setTextMessage(cursor.getString(cursor.getColumnIndex("message")));
+                bean.setTime(cursor.getLong(cursor.getColumnIndex("time")));
+                data.add(bean);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+
+        if (data == null) {
+            insertFakeData();
+        }
+    }
+
+    private void insertFakeData() {
         data = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
 
         for (int i = 0;i < 10; i ++) {
             ChatDetailBean bean = new ChatDetailBean();
@@ -87,9 +121,18 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
                 bean.setUserIdTo("1");
                 bean.setTextMessage("喵喵喵喵喵喵"+i);
             }
+            bean.setTime(System.currentTimeMillis());
             data.add(bean);
+            values.clear();
+            values.put("fromName", bean.getUserNameFrom());
+            values.put("toName", bean.getUserNameTo());
+            values.put("fromId", bean.getUserIdFrom());
+            values.put("toId", bean.getUserIdTo());
+            values.put("message", bean.getTextMessage());
+            values.put("time", bean.getTime());
+            db.insert("message", null, values);
         }
-
+        db.close();
     }
 
     private void initIntent() {
@@ -110,13 +153,20 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
         //mDetailAdapter.setData((ArrayList<EMMessage>) conversation.getAllMessages());
         mDetailAdapter.setData(data);
         mRvChatDetail.setAdapter(mDetailAdapter);
-        mRvChatDetail.scrollTo(0, mRvChatDetail.computeVerticalScrollRange());
 
         mEtTypein = findViewById(R.id.et_chatbar_typein);
         mIvEmoji = findViewById(R.id.iv_chatbar_emoji);
         mIvAdd = findViewById(R.id.iv_chatbar_add);
         mTvSend = findViewById(R.id.tv_chatbar_send);
         mIvEmoji.setOnClickListener(this);
+    }
+
+    private void hideInputKeyboard() {
+        //隐藏输入法
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(),0);
+        }
     }
 
     @Override
@@ -127,10 +177,10 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
                 finish();
                 break;
             case R.id.iv_chatbar_emoji:
-                //emoji笑脸
+                //TODO:emoji笑脸
                 break;
             case R.id.iv_chatbar_add:
-                //加号
+                //TODO:加号
                 break;
             case R.id.tv_chatbar_send:
                 //发送
@@ -142,6 +192,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
     }
 
     private void sendMessage() {
+        mTvSend.setClickable(false);
         String msg = mEtTypein.getText().toString();
         if (TextUtils.isEmpty(msg)) {
             Toast.makeText(this, "发送内容不能为空！", Toast.LENGTH_SHORT).show();
@@ -153,15 +204,32 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
             bean.setUserIdFrom("1");
             bean.setUserIdTo("2");
             bean.setTextMessage(msg);
+            bean.setTime(System.currentTimeMillis());
             mDetailAdapter.addData(bean);
-            mRvChatDetail.scrollTo(0, mRvChatDetail.computeVerticalScrollRange());
+
+            save2Database(bean);
         }
+        mTvSend.setClickable(true);
+    }
+
+    private void save2Database(ChatDetailBean bean) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("fromName", bean.getUserNameFrom());
+        values.put("toName", bean.getUserNameTo());
+        values.put("fromId", bean.getUserIdFrom());
+        values.put("toId", bean.getUserIdTo());
+        values.put("message", bean.getTextMessage());
+        values.put("time", bean.getTime());
+        db.insert("message", null, values);
+        values.clear();
+        db.close();
     }
 
     /**
      * 软键盘弹出时 显示发送按钮
      * 软键盘隐藏时 显示添加按钮
-     * @param isPopup
+     * @param isPopup 软键盘是是否弹出
      */
     private void changeSend(boolean isPopup) {
         if (isPopup) {
