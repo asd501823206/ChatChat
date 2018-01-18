@@ -48,7 +48,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+//import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * okhttp
@@ -351,13 +351,14 @@ public class OkHttpOperation {
         }
 
         protected void checkRequestArgs(boolean isRx) {
-            url = checkNotNull(url, "url不能为空");
-            if (!isRx) {
-                successCallBack = checkNotNull(successCallBack, "必须设置请求成功回调");
-            }
-            if (method == Method.POST) {
-                params = checkNotNull(params, "post请求参数不能为空");
-            }
+            //TODO:guava-22.0 jar包加上后无法编译
+//            url = checkNotNull(url, "url不能为空");
+//            if (!isRx) {
+//                successCallBack = checkNotNull(successCallBack, "必须设置请求成功回调");
+//            }
+//            if (method == Method.POST) {
+//                params = checkNotNull(params, "post请求参数不能为空");
+//            }
         }
 
         @Override

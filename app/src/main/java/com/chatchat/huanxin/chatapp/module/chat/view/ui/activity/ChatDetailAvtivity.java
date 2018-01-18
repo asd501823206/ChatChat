@@ -1,7 +1,6 @@
 package com.chatchat.huanxin.chatapp.module.chat.view.ui.activity;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Rect;
@@ -11,8 +10,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,6 +23,7 @@ import com.chatchat.huanxin.chatapp.common.view.activity.BaseActivity;
 import com.chatchat.huanxin.chatapp.module.chat.model.ChatDetailBean;
 import com.chatchat.huanxin.chatapp.module.chat.view.adapter.ChatDetailAdapter;
 import com.chatchat.huanxin.chatapp.utils.SpHelper;
+import com.chatchat.huanxin.chatapp.utils.Touch2CloseSoftKeyboardUtil;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMMessage;
@@ -49,6 +49,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
     private float mDown;
 
     private DBHelper dbHelper;
+    private Touch2CloseSoftKeyboardUtil touch2CloseSoftKeyboardUtil;
 
 //    private EMConversation conversation;
 //    private String id;
@@ -142,6 +143,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
     }
 
     private void initViews() {
+        touch2CloseSoftKeyboardUtil = new Touch2CloseSoftKeyboardUtil();
         TextView mTvTitle = findViewById(R.id.tv_chat_detail_name);
         mTvTitle.setText("会话");
         mRvChatDetail = findViewById(R.id.rv_chat_detail);
@@ -161,12 +163,10 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
         mIvEmoji.setOnClickListener(this);
     }
 
-    private void hideInputKeyboard() {
-        //隐藏输入法
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(),0);
-        }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        touch2CloseSoftKeyboardUtil.autoCloseSoft(this, ev);
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
