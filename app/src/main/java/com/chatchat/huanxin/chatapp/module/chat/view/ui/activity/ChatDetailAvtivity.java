@@ -54,7 +54,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
 //    private EMConversation conversation;
 //    private String id;
 
-    private ArrayList<ChatDetailBean> data;
+    private ArrayList<ChatDetailBean> data = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,7 +97,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
         cursor.close();
         db.close();
 
-        if (data == null) {
+        if (data.size() == 0) {
             insertFakeData();
         }
     }
@@ -155,6 +155,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
         //mDetailAdapter.setData((ArrayList<EMMessage>) conversation.getAllMessages());
         mDetailAdapter.setData(data);
         mRvChatDetail.setAdapter(mDetailAdapter);
+        mRvChatDetail.scrollToPosition(data.size() - 1);
 
         mEtTypein = findViewById(R.id.et_chatbar_typein);
         mIvEmoji = findViewById(R.id.iv_chatbar_emoji);
@@ -165,7 +166,7 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        touch2CloseSoftKeyboardUtil.autoCloseSoft(this, ev);
+        touch2CloseSoftKeyboardUtil.autoClose(this, ev);
         return super.dispatchTouchEvent(ev);
     }
 
@@ -259,7 +260,6 @@ public class ChatDetailAvtivity extends BaseActivity implements View.OnClickList
                     keyboardHeight = screenBottom - rect.bottom;
                     SpHelper.getInstance().writeToPreferences("keyboard_height", keyboardHeight);
                 }
-                mRvChatDetail.scrollTo(0, mRvChatDetail.computeVerticalScrollRange());
                 changeSend(true);
             }else {
                 changeSend(false);

@@ -95,7 +95,7 @@ public class Touch2CloseSoftKeyboardUtil {
                 }
             }
         }
-        return null;
+        return viewGroup;
     }
 
     /**
